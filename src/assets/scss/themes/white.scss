@@ -1,0 +1,82 @@
+//<HeaderBar>==========================================
+.headerBar {
+  background: #3C3C3C;
+  //background: red;
+
+  &__name {
+    color: white;
+  }
+}
+//</HeaderBar>==========================================
+
+//<Body>==========================================
+body {
+  background: #ffffff;
+}
+//</Body>==========================================
+
+//<Options>==========================================
+.ops {
+  background: rgba(255, 255, 255, 1);
+  color: #212529;
+
+  &__btn {
+
+    &:disabled {
+      background: #DCDCDC;
+      color: #919191;
+    }
+  }
+}
+//</Options>==========================================
+
+
+//<Dropdown>==========================================
+.drop {
+
+  // Pre text
+  &__header {
+    opacity: 0.8;
+  }
+}
+
+//Content-menu
+.vs__dropdown-toggle {
+  box-shadow: 0 2px 15px 1px rgba(0, 0, 0, 0.15);
+}
+
+//Content-list
+.vs__dropdown-menu {
+  background: white;
+  box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.15);
+
+  //Items
+  > li {
+    &:hover {
+      background: rgba(0, 0, 0, 0.10);
+    }
+  }
+}
+
+//</Dropdown>==========================================
+
+//<Notification>==========================================
+
+.mess {
+
+  &__succ {
+    background: #96FB86;
+    color: rgba(33, 37, 41, 1);
+  }
+  &__fail {
+    background: #FB8686;
+    color: rgba(33, 37, 41, 1);
+  }
+  &__btn {
+    background: rgba(255, 255, 255, 1);
+    color: rgba(33, 37, 41, 1);
+  }
+}
+
+//</Notification>==========================================
+

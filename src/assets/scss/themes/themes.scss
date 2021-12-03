@@ -1,0 +1,243 @@
+// Default (White)
+[theme="white"] {
+  --font-primary: rgba(33, 37, 41, 1);
+  --font-secondary: rgba(255, 255, 255, 1);
+  --font-sub: rgba(33, 37, 41, 0.8);
+  --font-disabled: #919191;
+
+  --placeholder: rgba(0, 0, 0, 0,5);
+
+  --item-selected: #E7E7E7;
+
+  --header: #3C3C3C;
+  --background: #FFFFFF;
+  --front-elem: #FFFFFF;
+
+  --notif-succ: #96FB86;
+  --notif-fail: #FB8686;
+
+  --btn: #FFFFFF;
+  --btn-hover: #ECECEC;
+  --btn-active: #8F8F8F;
+  --btn-disabled: #DCDCDC;
+}
+[theme="black"] {
+  --font-primary: #FCFCFC;
+  --font-secondary: #FCFCFC;
+  --font-sub: rgba(220, 220, 220, 0.8);;
+  --font-disabled: #919191;
+
+  --placeholder: rgba(220, 220, 220, 0.5);
+
+  --item-selected: #767676;;
+
+  --header: #2F86D6;;
+  --background: #4D4D4D;
+  --front-elem: #2C2C2C;
+
+  --notif-succ: #63F04C;
+  --notif-fail: #FFFFFF;
+
+  --btn: #313131;
+  --btn-hover: #545454;
+  --btn-active: #8E8E8E;
+  --btn-disabled: #DCDCDC;
+}
+[theme="autumn"] {
+  --font-primary: #000000;
+  --font-secondary: #FFFFFF;
+  --font-sub: rgba(0, 0, 0, 0.6);
+  --font-disabled: #DA7976;
+
+  --placeholder: rgba(0, 0, 0, 0,6);
+
+  --item-selected: #FFB68C;
+
+  --header: #DA5652;
+  --background: #FD9064;
+  --front-elem: #FEDA7E;
+
+  --notif-succ: #96FB86;
+  --notif-fail: #FB8686;
+
+  --btn: #DA5652;
+  --btn-hover: #FC6864;
+  --btn-active: #CD4B47;
+  --btn-disabled: #DFADAC;
+}
+[theme="dark"] {
+  --font-primary: #EAEAEA;
+  --font-secondary: #FFFFFF;
+  --font-sub: rgba(255, 255, 255, 0.6);
+  --font-disabled: #B9B9B9;
+
+  --placeholder: rgba(255, 255, 255, 0,6);
+
+  --item-selected: #886E94;
+
+  --header: #6F65A1;
+  --background: #553954;
+  --front-elem: #C06F7E;
+
+  --notif-succ: #63F04C;
+  --notif-fail: #FFFFFF;
+
+  --btn: #688C56;
+  --btn-hover: #8AC06F;
+  --btn-active: #52773F;
+  --btn-disabled: #857C87;
+}
+
+//Map
+//<HeaderBar>==========================================
+.headerBar {
+  background: var(--header);
+  //background: red;
+
+  &__name {
+    color: var(--font-secondary);
+  }
+}
+
+//<Body>==========================================
+body {
+  background: var(--background);
+}
+
+//<RateCard>==========================================
+.card {
+  background: var(--front-elem);
+  color: var(--font-primary);
+}
+
+//<Options>==========================================
+.ops {
+  background: var(--background);
+  color: var(--font-primary);
+
+  &__btn {
+    background: var(--btn);
+    color: var(--font-primary);
+
+    &:hover {
+      background: var(--btn-hover);
+    }
+    &:active {
+      background: var(--btn-active);
+    }
+    &:disabled {
+      background: var(--btn-disabled);
+      color: var(--font-disabled);
+      cursor: default;
+    }
+  }
+  &__input {
+    background: var(--front-elem);
+    color: var(--font-primary);
+
+    &::placeholder {
+      color: var(--placeholder);
+    }
+  }
+
+  &__close {
+    > svg > path {
+      fill: var(--font-primary);
+    }
+  }
+}
+
+//<Dropdown>==========================================
+.drop {
+
+  // Pre text
+  &__header {
+    opacity: 0.8;
+    color: var(--font-sub);
+  }
+}
+
+//Content-menu
+.vs__dropdown-toggle {
+  background: var(--front-elem);
+  box-shadow: 0 2px 15px 1px rgba(0, 0, 0, 0.15);
+}
+
+//Content-list
+.vs__dropdown-menu {
+  background: var(--background);
+  color: var(--font-primary);
+  box-shadow: 0 4px 10px 0px rgba(0, 0, 0, 0.15);
+
+  //Items
+  > li {
+    &:hover {
+      background: var(--item-selected);
+    }
+  }
+}
+
+.vs__selected {
+  color: var(--font-primary);
+}
+.vs__actions {
+  width: 30px;
+  display: flex;
+  flex-flow: row;
+  align-items: baseline;
+  justify-content: space-between;
+  > svg {
+    fill: var(--font-primary);
+  }
+}
+.vs__actions {
+
+}
+.vs__clear > svg {
+  fill: var(--font-primary);
+}
+
+//</Dropdown>==========================================
+
+//<ActiveBtn>==========================================
+.activeBtn {
+  background: var(--btn);
+  color: var(--font-primary);
+  &:hover {
+    background: var(--btn-hover);
+  }
+  &:active {
+    background: var(--btn-active);
+  }
+  &:disabled {
+    background: var(--btn-disabled);
+    color: var(--font-disabled);
+    cursor: default;
+  }
+}
+
+//<Notification>==========================================
+
+.mess {
+
+  &__succ {
+    background: var(--notif-succ);
+    color: var(--font-sub);
+  }
+  &__fail {
+    background: var(--notif-fail);
+    color: var(--font-sub);
+  }
+  &__btn {
+    background: var(--btn);
+    color: var(--font-sub);
+  }
+}
+
+//<Loading>==========================================
+.loading {
+
+  &__title {
+    color: var(--font-primary);
+  }
+}
