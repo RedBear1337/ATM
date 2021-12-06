@@ -74,7 +74,11 @@ export default {
       return this.$store.getters.getChosenRate;
     }
   },
-  watch: {},
+  watch: {
+      symbolsList(value) {
+          console.log('value', value);
+      }
+  },
   mounted: async function () {
     let accessData;
     let htmlElement = document.documentElement;

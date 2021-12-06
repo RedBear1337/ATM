@@ -34,6 +34,7 @@ electron.ipcMain.on('get-events', async (event, arg) => {
             let rates = await Http.parseRates(arg.accessData);
             let symbols = await Http.parseSymbols(arg.accessData);
             let flags = await Http.parseFlags();
+            console.log('symbols', symbols)
 
             for (let rate in rates.rates) {
                 ratesList.push({name: rate, amount: rates.rates[rate]});
@@ -41,27 +42,29 @@ electron.ipcMain.on('get-events', async (event, arg) => {
             let cycle = false;
             for (let symbol in symbols.symbols) {
                 if (symbol !== 'BTC') {
+
                     setTimeout(async ()=>{
                         flag = await Http.getFlagByFullName(flags, symbol);
+                        symbolsList.push({key: symbol, text: symbols.symbols[symbol], flag: flag});
+
+                        if (cycle === false) {
+                            let listLength = Object.keys(symbols.symbols).length;
+                            event.reply('get-events', {action: 'get-progressBar-update', value: 1, max: listLength});
+                            cycle = true;
+                        } else {
+                            // Получение количества скомпилированных данных
+                            let value = Object.keys(symbols.symbols);
+                            value = value.findIndex(item => item === symbol);
+                            event.reply('get-events', {action: 'get-progressBar-update', value: value});
+
+                        }
+                        fs.writeFileSync('presetList.dat', JSON.stringify({rates: ratesList, symbols: symbolsList}), 'utf-8')
+                        event.reply('get-events', {action: 'getList', rates: ratesList, symbols: symbolsList});
                     }, 200)
                 }
                 // value => key:, text => value (AED: 'United Arab Emirates Dirham')
-                symbolsList.push({key: symbol, text: symbols.symbols[symbol], flag: flag});
-                if (cycle === false) {
-                    let listLength = Object.keys(symbols.symbols).length;
-                    event.reply('get-events', {action: 'get-progressBar-update', value: 1, max: listLength});
-                    cycle = true;
-                } else {
-                    // Получение количества скомпилированных данных
-                    let value = Object.keys(symbols.symbols);
-                    value = value.findIndex(item => item === symbol);
-                    event.reply('get-events', {action: 'get-progressBar-update', value: value});
-                }
             }
 
-            fs.writeFileSync('presetList.dat', JSON.stringify({rates: ratesList, symbols: symbolsList}), 'utf-8')
-
-            event.reply('get-events', {action: 'getList', rates: ratesList, symbols: symbolsList});
     }
 })
 
