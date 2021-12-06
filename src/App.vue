@@ -6,23 +6,24 @@
 
     <!-- Main Content -->
     <router-view/>
+    <notifModal/>
   </div>
 </template>
 
 <script>
 import headerBar from "@/layouts/headerBar";
-import electron from "electron";
+import notifModal from "@/components/notifModal";
+
 export default {
   name: "app",
-  components: {headerBar},
+  components: {headerBar, notifModal},
   data: function () {
     return {}
   },
   computed: {},
   watch: {},
   mounted: async function () {
-    // let accessData = JSON.parse(localStorage.getItem('accessData'))
-    // await electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData})
+
   },
 }
 </script>

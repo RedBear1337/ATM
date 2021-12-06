@@ -1,12 +1,13 @@
 export default {
     state() {
         return {
-            theme: 'white',
+            theme: '',
         }
     },
     mutations: {
         setTheme(state, theme) {
-            state.theme = theme.text;
+            // state.theme = theme.text;
+            state.theme = theme;
         }
     },
     getters: {

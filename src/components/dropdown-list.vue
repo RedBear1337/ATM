@@ -13,7 +13,7 @@
              :src="require('../assets/svg/flags/'+option.flag+'.svg')"
              alt="">
         <img class="drop__img" v-if="data.image === 'themes'"
-             :src="require('../assets/svg/themes/'+option.text+'.svg')"
+             :src="require('../assets/svg/themes/'+option.text.toLowerCase()+'.svg')"
              alt="">
         {{ option.text }}
       </template>
@@ -35,7 +35,7 @@ export default {
   props: ['data'],
   data() {
     return {
-      item: {text: '', value: '', flag: ''},
+      item: '',
     }
   },
   methods: {},
@@ -47,11 +47,14 @@ export default {
   watch: {
     item(value) {
       this.data.chooseFunc(value);
-    }
+    },
   },
   mounted() {
     if (!(!!this.data.margin)) {
       this.data.margin = 0;
+    }
+    if (!!this.data.chosenItem) {
+      this.item = this.data.chosenItem;
     }
   },
 }

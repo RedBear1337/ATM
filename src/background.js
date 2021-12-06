@@ -7,14 +7,9 @@ import * as electron from "electron";
 import Http from '@/backend/helpers/http'
 
 import * as fs from 'node-fs';
-let list;
 
-// Windows
-/**
- * Объект хранит в себе все когда либо созданные окна
- * @type {{}}
- */
-let allWindows = {};
+import {allWindows} from "@/backend/helpers/globalVars";
+let list;
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -38,6 +33,7 @@ electron.ipcMain.on('get-events', async (event, arg) => {
 
             let rates = await Http.parseRates(arg.accessData);
             let symbols = await Http.parseSymbols(arg.accessData);
+            let flags = await Http.parseFlags();
 
             for (let rate in rates.rates) {
                 ratesList.push({name: rate, amount: rates.rates[rate]});
@@ -45,7 +41,9 @@ electron.ipcMain.on('get-events', async (event, arg) => {
             let cycle = false;
             for (let symbol in symbols.symbols) {
                 if (symbol !== 'BTC') {
-                    flag = await Http.parseFlagByFullName(symbol);
+                    setTimeout(async ()=>{
+                        flag = await Http.getFlagByFullName(flags, symbol);
+                    }, 200)
                 }
                 // value => key:, text => value (AED: 'United Arab Emirates Dirham')
                 symbolsList.push({key: symbol, text: symbols.symbols[symbol], flag: flag});
@@ -64,6 +62,20 @@ electron.ipcMain.on('get-events', async (event, arg) => {
             fs.writeFileSync('presetList.dat', JSON.stringify({rates: ratesList, symbols: symbolsList}), 'utf-8')
 
             event.reply('get-events', {action: 'getList', rates: ratesList, symbols: symbolsList});
+    }
+})
+
+electron.ipcMain.on('service-events', (event, arg) => {
+    switch (arg.action) {
+        case ('show-notif'):
+            event.reply('service-events', {action: arg.action, notifData: arg.notifData});
+            break
+        case ('close-win'):
+            allWindows['win'].destroy();
+            break
+        case ('hide-win'):
+            allWindows['win'].minimize();
+            break
     }
 })
 
@@ -124,17 +136,6 @@ app.on('ready', async () => {
         }
     }
     await createWindow();
-
-    electron.ipcMain.on('service-events', (event, arg) => {
-        switch (arg.action) {
-            case ('close-win'):
-                allWindows['win'].destroy();
-                break
-            case ('hide-win'):
-                allWindows['win'].minimize();
-                break
-        }
-    })
 })
 
 // Exit cleanly on request from parent process in development mode.

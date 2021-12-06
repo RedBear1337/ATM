@@ -14,7 +14,12 @@
       <div class="ops__label">
         <span class="ops__subtitle">Themes</span>
         <dropdownList class="ops__drop"
-                      :data="{loading: false, list: themes, image: 'themes', width: '100%', chooseFunc: chooseTheme}"/>
+                      :data="{loading: false,
+                      list: themes,
+                      chosenItem: chosenTheme,
+                      image: 'themes',
+                      width: '100%',
+                      chooseFunc: chooseTheme}"/>
       </div>
       <form class="ops__label">
         <span class="ops__subtitle">Import Data</span>
@@ -49,7 +54,7 @@ export default {
   components: {dropdownList, actionButton},
   data: function () {
     return {
-      themes: [{text: 'white'}, {text: 'black'}, {text: 'autumn'}, {text: 'dark'}],
+      themes: [{text: 'White'}, {text: 'Black'}, {text: 'Autumn'}, {text: 'Dark'}],
 
       token: '',
       linkToRates: '',
@@ -62,7 +67,7 @@ export default {
      * @param {string} theme
      */
     chooseTheme(theme) {
-      this.$store.commit('setTheme', theme);
+      this.$store.commit('setTheme', theme.text);
     },
     /**
      * Устанавливает значения для accessData - данные для парса списка валют
@@ -86,8 +91,9 @@ export default {
       if (this.$store.getters.getValue === 0) {
         let accessData = JSON.parse(localStorage.getItem('accessData'))
         electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData})
+        electron.ipcRenderer.send('service-events', {action: 'show-notif', notifData: {type: 'succ'}})
       } else {
-        console.error(new Error('Нельзя запустить загрузку списка, пока не закончится текущая загрузка'))
+        electron.ipcRenderer.send('service-events', {action: 'show-notif', notifData: {type: 'fail', message: new Error('Нельзя запустить загрузку списка, пока не закончится текущая загрузка')}})
       }
 
     }
@@ -100,18 +106,20 @@ export default {
   watch: {
     chosenTheme(value) {
       let htmlElement = document.documentElement;
-      localStorage.setItem('theme', value);
-      htmlElement.setAttribute('theme', value);
+      if (!!value) {
+        localStorage.setItem('theme', value.toLowerCase());
+        htmlElement.setAttribute('theme', value.toLowerCase());
+      }
     },
   },
   mounted: async function () {
-    let htmlElement = document.documentElement;
-    let theme = localStorage.getItem("theme");
-    if (!!theme) {
-      htmlElement.setAttribute('theme', theme)
-    } else {
-      console.error(new Error('Ошибка при загрузке сохранённой темы'));
-    }
+    // let htmlElement = document.documentElement;
+    // let theme = localStorage.getItem("theme");
+    // if (!!theme) {
+    //   htmlElement.setAttribute('theme', theme)
+    // } else {
+    //   console.error(new Error('Ошибка при загрузке сохранённой темы'));
+    // }
 
     this.token = await this.$store.getters.getToken;
     this.linkToRates = await this.$store.getters.getLinkToRates;
@@ -123,7 +131,7 @@ export default {
 <style lang="scss">
 .ops {
   position: absolute;
-  top: 50%;
+  top: calc(50% + 32px);
   left: 50%;
   transform: translate(-50%, -50%);
   width: 1021px;

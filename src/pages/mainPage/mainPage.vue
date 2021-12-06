@@ -2,7 +2,12 @@
   <div class="main">
 
     <dropdownList class="main__drop" v-if="ratesList[0]"
-                  :data="{loading: loading, list: symbolsList, width: '45vw', margin: '2vw 0 5vw', image: 'flags', headerText: 'Press to choose rate', chooseFunc: chooseRate}"/>
+                  :data="{loading: loading,
+                  list: symbolsList,
+                  chosenItem: chosenRate.alt,
+                  width: '45vw', margin: '2vw 0 5vw',
+                  image: 'flags', headerText: 'Press to choose rate',
+                  chooseFunc: chooseRate}"/>
 
     <loading :state="'download'" v-else/>
 
@@ -65,6 +70,9 @@ export default {
     isCardShow() {
       return this.$store.getters.getIsCardShowState;
     },
+    chosenRate() {
+      return this.$store.getters.getChosenRate;
+    }
   },
   watch: {},
   mounted: async function () {
@@ -85,9 +93,11 @@ export default {
     if (localStorage.getItem('theme')) {
       let theme = localStorage.getItem('theme');
       htmlElement.setAttribute('theme', theme);
+      this.$store.commit('setTheme', theme[0].toUpperCase()+theme.slice(1));
     }
     else {
       htmlElement.setAttribute('theme', 'white');
+      this.$store.commit('setTheme', 'white');
     }
 
     if (!this.$store.getters.getListReady && this.$store.getters.getValue === 0) {

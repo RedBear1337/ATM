@@ -36,7 +36,7 @@
   --front-elem: #2C2C2C;
 
   --notif-succ: #63F04C;
-  --notif-fail: #FFFFFF;
+  --notif-fail: #ED4C4C;
 
   --btn: #313131;
   --btn-hover: #545454;
@@ -80,7 +80,7 @@
   --front-elem: #C06F7E;
 
   --notif-succ: #63F04C;
-  --notif-fail: #FFFFFF;
+  --notif-fail: #ED4C4C;
 
   --btn: #688C56;
   --btn-hover: #8AC06F;
@@ -108,6 +108,23 @@ body {
 .card {
   background: var(--front-elem);
   color: var(--font-primary);
+}
+
+//<Menu-list>==========================================
+.mlist {
+  background: var(--item-selected);
+}
+// Item
+.mitem {
+  background: var(--background);
+  color: var(--font-primary);
+
+  &:hover {
+    background: var(--btn-hover);
+  }
+  &:active {
+    background: var(--btn-active);
+  }
 }
 
 //<Options>==========================================
@@ -190,9 +207,6 @@ body {
     fill: var(--font-primary);
   }
 }
-.vs__actions {
-
-}
 .vs__clear > svg {
   fill: var(--font-primary);
 }
@@ -220,17 +234,28 @@ body {
 
 .mess {
 
+
+  &__icon > path {
+    fill: var(--font-primary);
+  }
   &__succ {
     background: var(--notif-succ);
-    color: var(--font-sub);
+    color: var(--font-secondary);
   }
   &__fail {
     background: var(--notif-fail);
-    color: var(--font-sub);
+    color: var(--font-primary);
   }
   &__btn {
     background: var(--btn);
-    color: var(--font-sub);
+    color: var(--font-primary);
+
+    &:hover {
+      background: var(--btn-hover);
+    }
+    &:active {
+      background: var(--btn-active);
+    }
   }
 }
 
