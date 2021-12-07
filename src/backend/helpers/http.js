@@ -11,7 +11,7 @@ class Http {
 
     /**
      * Возвращает объект, содержащий курсы валют
-     * @return {Promise<*>}
+     * @return {Promise<Object>}
      */
     async parseRates(accessData) {
         return new Promise((resolve, reject) => {
@@ -24,7 +24,7 @@ class Http {
                         `Status Code: ${statusCode}`);
                 }
                 if (error) {
-                    errorHandler(error)
+                    reject(errorHandler(error, 'rates'))
                     // Consume response data to free up memory
                     res.resume();
                     return;
@@ -41,10 +41,10 @@ class Http {
                         if (parsedData.success === true) {
                             resolve(parsedData);
                         } else {
-                            errorHandler(new Error('Token is expired'));
+                            reject(errorHandler(new Error('Token is expired'), 'rates'));
                         }
                     } catch (e) {
-                        errorHandler(e);
+                        reject(errorHandler(e, 'rates'));
                     }
                 });
 
@@ -54,7 +54,7 @@ class Http {
 
     /**
      * Возвращает объект, содержащий аббревиатуры валют
-     * @return {Promise<*>}
+     * @return {Promise<Object>}
      */
     async parseSymbols(accessData) {
         return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ class Http {
                         `Status Code: ${statusCode}`);
                 }
                 if (error) {
-                    errorHandler(error)
+                    reject(errorHandler(error, 'symbols'));
                     // Consume response data to free up memory
                     res.resume();
                     return;
@@ -84,10 +84,10 @@ class Http {
                         if (parsedData.success === true) {
                             resolve(parsedData);
                         } else {
-                            errorHandler(new Error('Token is expired'));
+                            reject(errorHandler(new Error('Token is expired'), 'symbols'));
                         }
                     } catch (e) {
-                        errorHandler(e);
+                        reject((errorHandler(e, 'symbols')));
                     }
                 });
 
@@ -96,8 +96,8 @@ class Http {
     }
 
     /**
-     * Возвращает массив существующих флагов
-     * @returns {Promise<unknown>}
+     * Возвращает объект существующих флагов, с парами ключ-значение
+     * @returns {Promise<Object>}
      */
     async parseFlags() {
         return new Promise((resolve, reject) => {
@@ -110,7 +110,7 @@ class Http {
                             `Status Code: ${statusCode}`);
                     }
                     if (error) {
-                        errorHandler(error)
+                        reject(errorHandler(error, 'flags'))
                         // Consume response data to free up memory
                         res.resume();
                         return;
@@ -126,7 +126,7 @@ class Http {
                             parsedData = JSON.parse(rawData);
                             resolve(parsedData);
                         } catch (e) {
-                            errorHandler(e);
+                            reject(errorHandler(e, 'flags'));
                         }
                     });
                 })
@@ -134,16 +134,19 @@ class Http {
     }
     /**
      * Возвращает код флага для svg изображения в папке assets/svg/flags
-     * @return {Promise<*>}
+     * @param {Object} flagsObj - key: код флага, value: название страны
+     * @param {String} fullName - название страны
+     * @return {Promise<String>}
      */
-    async getFlagByFullName(flagsArr, fullName) {
+    async getFlagByFullName(flagsObj, fullName) {
         const cc = require('currency-codes');
         let flag;
 
         let currencyObj = cc.code(fullName);
 
         try {
-            flag = await Object.keys(flagsArr).find(key => flagsArr[key] === currencyObj.countries[0]);
+            // flag = await Object.keys(flagsArr).find(key => flagsArr[key] === currencyObj.countries[0]);
+            flag = Object.keys(flagsObj).find(key => flagsObj[key] === currencyObj.countries[0]);
         } catch (e) {
             return 'empty';
         }

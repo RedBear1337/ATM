@@ -26,12 +26,12 @@
         <input v-model="token" placeholder="Your Token" type="text" class="ops__input">
         <input v-model="linkToRates" placeholder="Link to rates" type="text" class="ops__input">
         <input v-model="linkToAbb" placeholder="Link to abbreviations" type="text" class="ops__input">
-        <button ref="btn" type="button" @click.prevent="importData()" class="ops__btn">Import</button>
+        <button ref="btn" type="button" @click.prevent="resetToDefault()" class="ops__btn">Reset to default</button>
       </form>
     </div>
 
     <div class="ops__controls">
-      <span @click="sendData()">
+      <span @click="apply()">
         <actionButton :data="{message: 'Apply', width: '220px', type: 'button'}"/>
       </span>
       <span @click="$router.go(-1)">
@@ -69,6 +69,50 @@ export default {
     chooseTheme(theme) {
       this.$store.commit('setTheme', theme.text);
     },
+    resetToDefault() {
+      this.token = this.$store.getters.getDefaultToken;
+      this.linkToRates = this.$store.getters.getDefaultRates;
+      this.linkToAbb = this.$store.getters.getDefaultAbb;
+      this.$store.commit('setAccessData', {token: this.token, rate: this.linkToRates, abb: this.linkToAbb});
+      localStorage.setItem('accessData', JSON.stringify({
+        token: this.token,
+        rate: this.linkToRates,
+        abb: this.linkToAbb
+      }));
+    },
+    /**
+     * Применяет настройки для запроса данных и создаёт запрос
+     */
+    apply() {
+      let accessData;
+      if (localStorage.getItem('accessData')) {
+        accessData = JSON.parse(localStorage.getItem('accessData'))
+      }
+      else {
+        this.resetToDefault()
+        electron.ipcRenderer.send('service-events', {action: 'show-notif',
+          notifData: {
+            type: 'fail',
+            message: new Error('Сохранённые значения для сбора данных не найдены. Произведен сброс до значений по-умолчанию. accessData'),
+          }
+        })
+      }
+      if (!this.$store.getters.getIsOnLoading) {
+          this.$store.dispatch('startLoad');
+          electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData});
+          electron.ipcRenderer.send('service-events', {action: 'show-notif', notifData: {type: 'succ'}})
+          this.$router.go(-1);
+      }
+      else {
+        electron.ipcRenderer.send('service-events', {action: 'show-notif',
+          notifData: {
+            type: 'fail',
+            message: new Error('Нельзя запустить загрузку списка, пока не закончится текущая загрузка')
+          }
+        })
+      }
+
+    },
     /**
      * Устанавливает значения для accessData - данные для парса списка валют
      */
@@ -88,12 +132,18 @@ export default {
      * Запускает процесс загрузки новых данных.
      */
     sendData() {
+      this.$store.dispatch('startLoad');
       if (this.$store.getters.getValue === 0) {
         let accessData = JSON.parse(localStorage.getItem('accessData'))
         electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData})
         electron.ipcRenderer.send('service-events', {action: 'show-notif', notifData: {type: 'succ'}})
       } else {
-        electron.ipcRenderer.send('service-events', {action: 'show-notif', notifData: {type: 'fail', message: new Error('Нельзя запустить загрузку списка, пока не закончится текущая загрузка')}})
+        electron.ipcRenderer.send('service-events', {action: 'show-notif',
+          notifData: {
+            type: 'fail',
+            message: new Error('Нельзя запустить загрузку списка, пока не закончится текущая загрузка')
+          }
+        })
       }
 
     }
@@ -120,10 +170,22 @@ export default {
     // } else {
     //   console.error(new Error('Ошибка при загрузке сохранённой темы'));
     // }
+    if (this.$store.getters.getToken && this.$store.getters.getLinkToRates && this.$store.getters.getLinkToAbb) {
+      this.token = await this.$store.getters.getToken;
+      this.linkToRates = await this.$store.getters.getLinkToRates;
+      this.linkToAbb = await this.$store.getters.getLinkToAbb;
+    } else {
+      this.token = await this.$store.getters.getDefaultToken;
+      this.linkToRates = await this.$store.getters.getDefaultRates;
+      this.linkToAbb = await this.$store.getters.getDefaultAbb;
+    }
+    this.$store.commit('setAccessData', {token: this.token, rate: this.linkToRates, abb: this.linkToAbb});
+    localStorage.setItem('accessData', JSON.stringify({
+      token: this.token,
+      rate: this.linkToRates,
+      abb: this.linkToAbb
+    }));
 
-    this.token = await this.$store.getters.getToken;
-    this.linkToRates = await this.$store.getters.getLinkToRates;
-    this.linkToAbb = await this.$store.getters.getLinkToAbb;
   },
 }
 </script>

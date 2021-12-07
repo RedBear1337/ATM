@@ -75,23 +75,11 @@ export default {
     }
   },
   watch: {
-      symbolsList(value) {
-          console.log('value', value);
-      }
+
   },
   mounted: async function () {
     let accessData;
     let htmlElement = document.documentElement;
-
-    // Получение сохраненных данных для парса валют
-    if (localStorage.getItem('accessData')) {
-      accessData = JSON.parse(localStorage.getItem('accessData'))
-    } else {
-      let token = this.$store.getters.getToken;
-      let linkToRates = this.$store.getters.getLinkToRates;
-      let linkToAbb = this.$store.getters.getLinkToAbb;
-      accessData = {token: token, linkToRates: linkToRates, linkToAbb: linkToAbb};
-    }
 
     // Установка темы
     if (localStorage.getItem('theme')) {
@@ -104,22 +92,40 @@ export default {
       this.$store.commit('setTheme', 'white');
     }
 
-    if (!this.$store.getters.getListReady && this.$store.getters.getValue === 0) {
-        await electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData});
+    // Получение сохраненных данных для парса валют
+    if (localStorage.getItem('accessData')) {
+      accessData = JSON.parse(localStorage.getItem('accessData'))
+    } else {
+      let token = this.$store.getters.getDefaultToken;
+      let linkToRates = this.$store.getters.getDefaultRates;
+      let linkToAbb = this.$store.getters.getDefaultAbb;
+      accessData = {token: token, linkToRates: linkToRates, linkToAbb: linkToAbb};
     }
+    if (!this.$store.getters.getListReady && !this.$store.getters.getIsOnLoading) {
+      await electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData});
+      await this.$store.dispatch('startLoad');
+    }
+
+    // Получение сохранённых списков rates и symbols
+    if (localStorage.getItem('completeRatesList') && localStorage.getItem('completeSymbolsList')) {
+      this.rates = JSON.parse(localStorage.getItem('completeRatesList'));
+      this.symbols = JSON.parse(localStorage.getItem('completeSymbolsList'));
+      this.$store.commit('setListReady', true);
+      this.$store.commit('setLists', {ratesList: this.rates, symbolsList: this.symbols});
+    }
+
     electron.ipcRenderer.on('get-events', (event, arg) => {
       switch (arg.action) {
         case ('getList'):
-          if (arg.list) {
-            this.rates = arg.list.rates;
-            this.symbols = arg.list.symbols;
-          } else {
+          if (arg.rates && arg.symbols) {
             this.rates = arg.rates;
             this.symbols = arg.symbols;
+            this.$store.commit('setListReady', true);
+            this.$store.commit('setLists', {ratesList: this.rates, symbolsList: this.symbols});
+            this.$store.dispatch('endLoad');
+            localStorage.setItem('completeRatesList', JSON.stringify(arg.rates));
+            localStorage.setItem('completeSymbolsList', JSON.stringify(arg.symbols));
           }
-
-          this.$store.commit('setListReady', true);
-          this.$store.commit('setLists', {ratesList: this.rates, symbolsList: this.symbols});
           break
       }
 

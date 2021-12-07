@@ -6,10 +6,8 @@ import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer'
 import * as electron from "electron";
 import Http from '@/backend/helpers/http'
 
-import * as fs from 'node-fs';
-
-import {allWindows} from "@/backend/helpers/globalVars";
-let list;
+import {allWindows} from "@/backend/vars/globalVars";
+import listCompiler from "@/backend/helpers/listCompiler";
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -17,54 +15,28 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
     {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
-if (fs.existsSync('presetList.dat')) {
-    list = fs.readFileSync('presetList.dat', 'utf-8');
-}
 
 electron.ipcMain.on('get-events', async (event, arg) => {
     switch (arg.action) {
         case ('getList'):
-            if (fs.existsSync('presetList.dat')) {
-                event.reply('get-events', {action: 'getList', list: JSON.parse(list)});
-            }
-            let ratesList = [];
-            let symbolsList = [];
-            let flag;
 
-            let rates = await Http.parseRates(arg.accessData);
-            let symbols = await Http.parseSymbols(arg.accessData);
-            let flags = await Http.parseFlags();
-            console.log('symbols', symbols)
+            let rates = await Http.parseRates(arg.accessData)
+                .catch((err) => {
+                    return false
+                });
+            let symbols = await Http.parseSymbols(arg.accessData)
+                .catch((err) => {
+                    return false
+                });
+            let flags = await Http.parseFlags()
+                .catch((err) => {
+                    return false
+                });
 
-            for (let rate in rates.rates) {
-                ratesList.push({name: rate, amount: rates.rates[rate]});
-            }
-            let cycle = false;
-            for (let symbol in symbols.symbols) {
-                if (symbol !== 'BTC') {
-
-                    setTimeout(async ()=>{
-                        flag = await Http.getFlagByFullName(flags, symbol);
-                        symbolsList.push({key: symbol, text: symbols.symbols[symbol], flag: flag});
-
-                        if (cycle === false) {
-                            let listLength = Object.keys(symbols.symbols).length;
-                            event.reply('get-events', {action: 'get-progressBar-update', value: 1, max: listLength});
-                            cycle = true;
-                        } else {
-                            // Получение количества скомпилированных данных
-                            let value = Object.keys(symbols.symbols);
-                            value = value.findIndex(item => item === symbol);
-                            event.reply('get-events', {action: 'get-progressBar-update', value: value});
-
-                        }
-                        fs.writeFileSync('presetList.dat', JSON.stringify({rates: ratesList, symbols: symbolsList}), 'utf-8')
-                        event.reply('get-events', {action: 'getList', rates: ratesList, symbols: symbolsList});
-                    }, 200)
-                }
-                // value => key:, text => value (AED: 'United Arab Emirates Dirham')
-            }
-
+            let ratesList = await listCompiler.createRatesList(rates);
+            let symbolsList = await listCompiler.createSymbolsList(symbols, flags, listCompiler.progressUpdate).then((res) => {
+                event.reply('get-events', {action: 'getList', rates: ratesList, symbols: res});
+            })
     }
 })
 

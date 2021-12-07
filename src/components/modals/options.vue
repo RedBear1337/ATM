@@ -37,8 +37,6 @@
 import dropdownList from "@/components/dropdown-list";
 import actionButton from "@/components/action-button";
 
-import {ThemeHelper} from "@/backend/helpers/themeHelper";
-
 export default {
   name: "options",
   components: {dropdownList, actionButton},

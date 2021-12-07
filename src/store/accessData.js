@@ -2,9 +2,13 @@ export default {
     state() {
         return {
             // Data by default
-            token: '4d590f55e800d1adf04abbf0279d2fa8',
-            linkToRates: 'http://data.fixer.io/api/latest?access_key=',
-            linkToAbb: 'http://data.fixer.io/api/symbols?access_key=',
+            defaultToken: 'c0706b8d445e87b7dafd97b0441a654c',
+            defaultRates: 'http://data.fixer.io/api/latest?access_key=',
+            defaultAbb: 'http://data.fixer.io/api/symbols?access_key=',
+            // User data
+            token: '',
+            linkToRates: '',
+            linkToAbb: '',
         }
     },
     mutations: {
@@ -24,6 +28,17 @@ export default {
         getLinkToAbb(state) {
             return state.linkToAbb;
         },
+        getDefaultRates(state) {
+            return state.defaultRates;
+        },
+        getDefaultAbb(state) {
+            return state.defaultAbb;
+        },
+        getDefaultToken(state) {
+            return state.defaultToken;
+        },
+
+
     },
     actions: {
 

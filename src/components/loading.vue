@@ -32,7 +32,7 @@ export default {
       return this.$store.getters.getMax;
     },
     /**
-     * Возвращает сгенерированную строку, на основе ключегово слова (download)
+     * Возвращает сгенерированную строку, на основе ключевого слова (download)
      * @return {string}
      */
     genText() {
@@ -44,7 +44,7 @@ export default {
   },
   watch: {},
   mounted: async function () {
-    if (this.$store.getters.getValue === 0) {
+    if (this.$store.getters.getIsOnLoading) {
             await electron.ipcRenderer.send('get-events', {action: 'get-progressBar-update'})
     }
 
