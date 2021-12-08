@@ -15,6 +15,7 @@
 
   --notif-succ: #96FB86;
   --notif-fail: #FB8686;
+  --notif-process: #E7E7E7;
 
   --btn: #FFFFFF;
   --btn-hover: #ECECEC;
@@ -29,7 +30,7 @@
 
   --placeholder: rgba(220, 220, 220, 0.5);
 
-  --item-selected: #767676;;
+  --item-selected: #767676;
 
   --header: #2F86D6;;
   --background: #4D4D4D;
@@ -37,6 +38,7 @@
 
   --notif-succ: #63F04C;
   --notif-fail: #ED4C4C;
+  --notif-process: #767676;
 
   --btn: #313131;
   --btn-hover: #545454;
@@ -59,6 +61,7 @@
 
   --notif-succ: #96FB86;
   --notif-fail: #FB8686;
+  --notif-process: #FFB68C;
 
   --btn: #DA5652;
   --btn-hover: #FC6864;
@@ -81,6 +84,7 @@
 
   --notif-succ: #63F04C;
   --notif-fail: #ED4C4C;
+  --notif-process:  #886E94;
 
   --btn: #688C56;
   --btn-hover: #8AC06F;
@@ -246,6 +250,10 @@ body {
     background: var(--notif-fail);
     color: var(--font-primary);
   }
+  &__process {
+    background: var(--notif-process);
+    color: var(--font-sub);
+  }
   &__btn {
     background: var(--btn);
     color: var(--font-primary);
@@ -263,6 +271,17 @@ body {
 .loading {
 
   &__title {
+
     color: var(--font-primary);
+  }
+  &__bar{
+    background: var(--item-selected);
+
+    & > div {
+      color: var(--font-primary) !important;
+    }
+  }
+  &__line {
+
   }
 }

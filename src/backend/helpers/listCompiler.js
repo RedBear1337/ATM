@@ -24,7 +24,7 @@ class listCompiler {
     /**
      * Возвращает преобразованный массив курсов валют
      * @param {Object} rates - key: валюта, value: курс
-     * @returns {Promise<Array>} - [{name: 'AED', amount: 4.142626}]
+     * @returns {Promise<Array | Error>} - [{name: 'AED', amount: 4.142626}]
      */
     static async createRatesList(rates) {
         let ratesList = [];
@@ -32,7 +32,7 @@ class listCompiler {
             try {
                 ratesList.push({name: rate, amount: rates.rates[rate]});
             } catch (e) {
-                errorHandler(e, 'Ошибка при формировании массива rates')
+                return errorHandler(e, 'Ошибка при формировании массива rates')
             }
 
         }
@@ -58,7 +58,6 @@ class listCompiler {
             let isMaxSettled = false;
             for (let symbol in symbols.symbols) {
                 let listLength;
-                // flag = await this.getFlagByFullName(flags, symbol);
                 flag = await Http.getFlagByFullName(flags, symbol);
 
                 try {

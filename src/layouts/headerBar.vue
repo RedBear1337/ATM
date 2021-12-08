@@ -21,25 +21,14 @@
 
 <script>
 import electron from "electron";
-import options from "@/pages/options/options.vue";
+import settings from "@/pages/settings/settings.vue";
 import menuList from "@/components/menu-list/menu-list";
 
 export default {
   name: "headerBar",
-  components: {options, menuList},
+  components: {settings, menuList},
   data: function () {
     return {
-      navBtn: 'Settings',
-      menu: [
-        {
-          text: 'Settings',
-          func: this.switchOps
-        },
-        {
-          text: 'Exit',
-          func: this.closeWin
-        }
-        ]
     }
   },
   methods: {
@@ -49,11 +38,11 @@ export default {
     switchOps() {
       this.$store.commit('setMenuShow', false)
       switch (this.$route.name) {
-        case 'options':
+        case 'settings':
           this.$router.push({name: 'mainPage'});
           break
         case 'mainPage':
-          this.$router.push({name: 'options'});
+          this.$router.push({name: 'settings'});
           break
       }
     },
@@ -71,22 +60,32 @@ export default {
     },
     menuNavBtn() {
       switch (this.$route.name) {
-        case 'options':
+        case 'settings':
           return 'Home';
         case 'mainPage':
           return 'Settings'
         default:
           return 'Settings';
       }
+    },
+    menu() {
+      let menu = [
+        {
+          text: this.menuNavBtn,
+          func: this.switchOps
+        },
+        {
+          text: 'Exit',
+          func: this.closeWin
+        }
+      ]
+      return menu;
     }
   },
   watch: {
-    menuNavBtn() {
-      // this.navBtn = this.menuNavBtn;
-    }
   },
   mounted() {
-    // console.log(this.menuNavBtn);
+
   },
 }
 </script>

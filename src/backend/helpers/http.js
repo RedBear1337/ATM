@@ -10,6 +10,49 @@ class Http {
     }
 
     /**
+     * Проверка возможности получения файло с указанного адреса, с указанным токеном
+     * @param {Object} accessData - объект содержащий данные для запроса
+     * @param {String} accessData.link - ссылка
+     * @param {String} accessData.token - токен
+     * @returns {Promise<boolean>}
+     */
+    checkConnection(accessData) {
+        return new Promise(async (resolve, reject) => {
+            http.get(accessData.link + accessData.token, (res) => {
+                const {statusCode} = res;
+                let error;
+                if (statusCode !== 200) {
+                    error = true;
+                }
+                if (error) {
+                    res.resume();
+                    reject(errorHandler(new Error(`Не удалось получить доступ к указанному сайту: ${accessData.link}`), 'checkConnection'))
+                    return;
+                }
+                let rawData = '';
+                let parsedData;
+                res.setEncoding('utf8');
+                res.on('data', (chunk) => {
+                    rawData += chunk;
+                });
+                res.on('end', () => {
+                    try {
+                        parsedData = JSON.parse(rawData);
+                        if (parsedData.success === true) {
+                            resolve(true);
+                        } else {
+                            reject(errorHandler(new Error(`Неверно указан токен: ${accessData.token}.`), 'checkConnection'));
+                        }
+                    } catch (e) {
+                        reject(false);
+                    }
+                });
+            })
+
+        })
+    }
+
+    /**
      * Возвращает объект, содержащий курсы валют
      * @return {Promise<Object>}
      */
@@ -24,9 +67,8 @@ class Http {
                         `Status Code: ${statusCode}`);
                 }
                 if (error) {
-                    reject(errorHandler(error, 'rates'))
-                    // Consume response data to free up memory
                     res.resume();
+                    reject(errorHandler(error, 'rates'))
                     return;
                 }
                 let rawData = '';
@@ -67,9 +109,8 @@ class Http {
                         `Status Code: ${statusCode}`);
                 }
                 if (error) {
-                    reject(errorHandler(error, 'symbols'));
-                    // Consume response data to free up memory
                     res.resume();
+                    reject(errorHandler(error, 'symbols'));
                     return;
                 }
                 let rawData = '';
@@ -87,7 +128,7 @@ class Http {
                             reject(errorHandler(new Error('Token is expired'), 'symbols'));
                         }
                     } catch (e) {
-                        reject((errorHandler(e, 'symbols')));
+                        reject(errorHandler(e, 'symbols'));
                     }
                 });
 
@@ -101,37 +142,37 @@ class Http {
      */
     async parseFlags() {
         return new Promise((resolve, reject) => {
-                https.get('https://flagcdn.com/en/codes.json', (res) => {
+            https.get('https://flagcdn.com/en/codes.json', (res) => {
 
-                    const {statusCode} = res;
-                    let error;
-                    if (statusCode !== 200) {
-                        error = new Error('Request Failed.\n' +
-                            `Status Code: ${statusCode}`);
+                const {statusCode} = res;
+                let error;
+                if (statusCode !== 200) {
+                    error = new Error('Request Failed.\n' +
+                        `Status Code: ${statusCode}`);
+                }
+                if (error) {
+                    res.resume();
+                    reject(errorHandler(error, 'flags'))
+                    return;
+                }
+                let rawData = '';
+                let parsedData;
+                res.setEncoding('utf8');
+                res.on('data', (chunk) => {
+                    rawData += chunk;
+                });
+                res.on('end', () => {
+                    try {
+                        parsedData = JSON.parse(rawData);
+                        resolve(parsedData);
+                    } catch (e) {
+                        reject(errorHandler(e, 'Не удалось получить список флагов'));
                     }
-                    if (error) {
-                        reject(errorHandler(error, 'flags'))
-                        // Consume response data to free up memory
-                        res.resume();
-                        return;
-                    }
-                    let rawData = '';
-                    let parsedData;
-                    res.setEncoding('utf8');
-                    res.on('data', (chunk) => {
-                        rawData += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            parsedData = JSON.parse(rawData);
-                            resolve(parsedData);
-                        } catch (e) {
-                            reject(errorHandler(e, 'flags'));
-                        }
-                    });
-                })
+                });
+            })
         })
     }
+
     /**
      * Возвращает код флага для svg изображения в папке assets/svg/flags
      * @param {Object} flagsObj - key: код флага, value: название страны
@@ -145,7 +186,6 @@ class Http {
         let currencyObj = cc.code(fullName);
 
         try {
-            // flag = await Object.keys(flagsArr).find(key => flagsArr[key] === currencyObj.countries[0]);
             flag = Object.keys(flagsObj).find(key => flagsObj[key] === currencyObj.countries[0]);
         } catch (e) {
             return 'empty';

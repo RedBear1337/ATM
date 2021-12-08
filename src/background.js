@@ -8,6 +8,7 @@ import Http from '@/backend/helpers/http'
 
 import {allWindows} from "@/backend/vars/globalVars";
 import listCompiler from "@/backend/helpers/listCompiler";
+import {errorHandler} from "@/backend/helpers/errorHandler";
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -16,27 +17,77 @@ protocol.registerSchemesAsPrivileged([
     {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
 
+electron.ipcMain.handle('check-events', async (event, arg)=>{
+    switch (arg.action) {
+        case 'checkConnection':
+            let result;
+
+                for (let link in arg.links) {
+                    try {
+                    result = await Http.checkConnection({link: arg.links[link], token: arg.token});
+                    } catch (e) {
+                        errorHandler(e)
+                        return false
+                    }
+                }
+
+            return result
+    }
+})
+
+electron.ipcMain.handle('get-events', async (event, arg) => {
+    switch (arg.action) {
+        case 'getFlags':
+            let flag;
+            try {
+                flag = await Http.parseFlags()
+            } catch (e) {
+                return {error: e}
+            }
+
+            return flag
+    }
+})
+
 electron.ipcMain.on('get-events', async (event, arg) => {
     switch (arg.action) {
-        case ('getList'):
+        case 'getRates':
+            let rates;
+            try {
+                rates = await Http.parseRates(arg.accessData)
+            } catch(e) {
+                event.reply('get-events', {action: arg.action, error: e})
+                return false
+            }
 
-            let rates = await Http.parseRates(arg.accessData)
-                .catch((err) => {
-                    return false
-                });
-            let symbols = await Http.parseSymbols(arg.accessData)
-                .catch((err) => {
-                    return false
-                });
-            let flags = await Http.parseFlags()
-                .catch((err) => {
-                    return false
-                });
+            let ratesList;
+            try {
+                ratesList = await listCompiler.createRatesList(rates)
+            } catch(e) {
+                event.reply('get-events', {action: arg.action, error: e})
+                return false
+            }
+            event.reply('get-events', {action: arg.action, rates: ratesList});
+            break
 
-            let ratesList = await listCompiler.createRatesList(rates);
-            let symbolsList = await listCompiler.createSymbolsList(symbols, flags, listCompiler.progressUpdate).then((res) => {
-                event.reply('get-events', {action: 'getList', rates: ratesList, symbols: res});
-            })
+        case 'getSymbols':
+            let symbols;
+            try {
+                symbols = await Http.parseSymbols(arg.accessData);
+            } catch (e) {
+                event.reply('get-events', {action: arg.action, error: e})
+                return false
+            }
+
+            let symbolsList;
+            try {
+                symbolsList = await listCompiler.createSymbolsList(symbols, arg.flags, listCompiler.progressUpdate)
+            } catch (e) {
+                event.reply('get-events', {action: arg.action, error: e})
+                return false
+            }
+            event.reply('get-events', {action: arg.action, symbols: symbolsList});
+            break
     }
 })
 
@@ -44,6 +95,9 @@ electron.ipcMain.on('service-events', (event, arg) => {
     switch (arg.action) {
         case ('show-notif'):
             event.reply('service-events', {action: arg.action, notifData: arg.notifData});
+            break
+        case ('hide-notif'):
+            event.reply('service-events', {action: arg.action});
             break
         case ('close-win'):
             allWindows['win'].destroy();

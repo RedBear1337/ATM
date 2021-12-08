@@ -4,7 +4,7 @@ import {allWindows} from "@/backend/vars/globalVars";
 
 /**
  * Отправляет информацию об ошибке на frontend в компонент notifModal
- * @param {String} error
+ * @param {String} error - new Error('')
  * @param {String} error.message - сообщение об ошибке
  * @param desc - Ручное описание ошибки => "Ошибка получения флага"
  */

@@ -10,10 +10,13 @@ export default {
         setListReady(state, boolean) {
             state.listReady = boolean
         },
-        setLists(state, lists) {
-            state.symbolsList = lists.symbolsList;
-            state.ratesList = lists.ratesList;
-        }
+        setRatesList(state, rates) {
+            state.ratesList = rates;
+        },
+        setSymbolsList(state, symbols) {
+            state.symbolsList = symbols;
+        },
+
     },
     getters: {
         getListReady(state) {
@@ -26,5 +29,10 @@ export default {
             return state.ratesList;
         }
     },
-    actions: {}
+    actions: {
+        setLists(ctx, data) {
+            ctx.commit('setRatesList', data.rates);
+            ctx.commit('setSymbolsList', data.symbols);
+        }
+    }
 }

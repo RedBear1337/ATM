@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import mainPage from "@/pages/mainPage/mainPage";
-import options from "@/pages/options/options";
+import settings from "@/pages/settings/settings";
 
 Vue.use(VueRouter)
 
@@ -12,9 +12,9 @@ const routes = [
     component: mainPage
   },
   {
-    path: '/options',
-    name: 'options',
-    component: options
+    path: '/settings',
+    name: 'settings',
+    component: settings
   }
 ]
 

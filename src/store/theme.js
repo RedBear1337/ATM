@@ -6,7 +6,6 @@ export default {
     },
     mutations: {
         setTheme(state, theme) {
-            // state.theme = theme.text;
             state.theme = theme;
         }
     },

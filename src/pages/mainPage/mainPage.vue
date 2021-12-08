@@ -1,18 +1,19 @@
 <template>
   <div class="main">
 
+<!--    <dropdownList class="main__drop" v-if="ratesList[0]"-->
     <dropdownList class="main__drop" v-if="ratesList[0]"
-                  :data="{loading: loading,
+                  :data="{loading: loadingState,
                   list: symbolsList,
                   chosenItem: chosenRate.alt,
                   width: '45vw', margin: '2vw 0 5vw',
                   image: 'flags', headerText: 'Press to choose rate',
                   chooseFunc: chooseRate}"/>
 
-    <loading :state="'download'" v-else/>
+    <loading :loadingOps="{type: 'download', pos: loadingPos}" v-if="loadingState"/>
 
     <!-- Rate Card -->
-        <rateCard v-show="isCardShow"></rateCard>
+    <rateCard v-show="isCardShow"></rateCard>
   </div>
 </template>
 
@@ -28,6 +29,8 @@ export default {
   components: {dropdownList, loading, rateCard},
   data: function () {
     return {
+
+      flags: {},
       rates: [],
       symbols: [],
 
@@ -58,8 +61,15 @@ export default {
     }
   },
   computed: {
-    loading() {
-      return !this.$store.getters.getListReady;
+    loadingPos() {
+      if (!this.$store.getters.getListReady) {
+        return 'pre'
+      } else {
+        return 'after'
+      }
+    },
+    loadingState() {
+      return this.$store.getters.getIsOnLoading;
     },
     ratesList() {
       return this.$store.getters.getRatesList;
@@ -74,9 +84,7 @@ export default {
       return this.$store.getters.getChosenRate;
     }
   },
-  watch: {
-
-  },
+  watch: {},
   mounted: async function () {
     let accessData;
     let htmlElement = document.documentElement;
@@ -85,9 +93,8 @@ export default {
     if (localStorage.getItem('theme')) {
       let theme = localStorage.getItem('theme');
       htmlElement.setAttribute('theme', theme);
-      this.$store.commit('setTheme', theme[0].toUpperCase()+theme.slice(1));
-    }
-    else {
+      this.$store.commit('setTheme', theme[0].toUpperCase() + theme.slice(1));
+    } else {
       htmlElement.setAttribute('theme', 'white');
       this.$store.commit('setTheme', 'white');
     }
@@ -95,40 +102,61 @@ export default {
     // Получение сохраненных данных для парса валют
     if (localStorage.getItem('accessData')) {
       accessData = JSON.parse(localStorage.getItem('accessData'))
+      this.$store.commit('setAccessData', accessData);
     } else {
       let token = this.$store.getters.getDefaultToken;
       let linkToRates = this.$store.getters.getDefaultRates;
       let linkToAbb = this.$store.getters.getDefaultAbb;
       accessData = {token: token, linkToRates: linkToRates, linkToAbb: linkToAbb};
     }
+
+    // Формирование нового списка валют
     if (!this.$store.getters.getListReady && !this.$store.getters.getIsOnLoading) {
-      await electron.ipcRenderer.send('get-events', {action: 'getList', accessData: accessData});
       await this.$store.dispatch('startLoad');
+      this.flags = await electron.ipcRenderer.invoke('get-events', {action: 'getFlags'})
+
+      await electron.ipcRenderer.send('get-events', {action: 'getRates', accessData: accessData});
+      await electron.ipcRenderer.send('get-events', {
+        action: 'getSymbols',
+        accessData: accessData,
+        flags: this.flags
+      });
     }
 
-    // Получение сохранённых списков rates и symbols
+    // Получение сохранённого списка валют
     if (localStorage.getItem('completeRatesList') && localStorage.getItem('completeSymbolsList')) {
       this.rates = JSON.parse(localStorage.getItem('completeRatesList'));
       this.symbols = JSON.parse(localStorage.getItem('completeSymbolsList'));
       this.$store.commit('setListReady', true);
-      this.$store.commit('setLists', {ratesList: this.rates, symbolsList: this.symbols});
+
+      await this.$store.dispatch('setLists', {rates: this.rates, symbols: this.symbols});
     }
 
     electron.ipcRenderer.on('get-events', (event, arg) => {
-      switch (arg.action) {
-        case ('getList'):
-          if (arg.rates && arg.symbols) {
+      if (!arg.error) {
+        switch (arg.action) {
+          case 'getRates':
             this.rates = arg.rates;
+            this.$store.commit('setRatesList', this.rates);
+
+            localStorage.setItem('completeRatesList', JSON.stringify(this.rates));
+            break
+          case 'getSymbols':
             this.symbols = arg.symbols;
             this.$store.commit('setListReady', true);
-            this.$store.commit('setLists', {ratesList: this.rates, symbolsList: this.symbols});
+            this.$store.commit('setSymbolsList', this.symbols);
             this.$store.dispatch('endLoad');
-            localStorage.setItem('completeRatesList', JSON.stringify(arg.rates));
-            localStorage.setItem('completeSymbolsList', JSON.stringify(arg.symbols));
-          }
-          break
-      }
 
+            localStorage.setItem('completeSymbolsList', JSON.stringify(this.symbols));
+            break
+        }
+      } else {
+        electron.ipcRenderer.send('service-events', {
+          action: 'show-notif',
+          notifData: {type: 'fail', message: arg.error.message}
+        });
+        this.$store.dispatch('endLoad');
+      }
     })
   }
 }
@@ -136,9 +164,11 @@ export default {
 
 <style lang="scss">
 .main {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-flow: column;
+  height: 95vh;
 }
 </style>
