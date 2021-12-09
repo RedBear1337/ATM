@@ -191,6 +191,9 @@ export default {
   top: calc(50% + 32px);
   left: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-end;
   width: 1021px;
   height: 574px;
   padding: 12px 18px 34px;
@@ -227,6 +230,7 @@ export default {
 
   &__inner {
     display: flex;
+    flex: 0 1 100%;
     flex-flow: column;
     align-items: flex-start;
   }
@@ -251,12 +255,17 @@ export default {
   }
 
   &__controls {
+
     display: flex;
     flex-flow: row;
     align-items: center;
     justify-content: space-between;
-    margin: 0 auto;
+    margin: 0 auto 34px;
     width: 464px;
+  }
+
+  &__drop {
+    padding: 0;
   }
 
   //=========== Input
@@ -272,6 +281,10 @@ export default {
     font-weight: normal;
     font-size: 14px;
     line-height: 16px;
+
+    &:last-of-type {
+      margin-bottom: 20px;
+    }
   }
 
   &__btn {

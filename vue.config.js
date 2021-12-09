@@ -5,7 +5,6 @@ module.exports = {
             nodeIntegration: true,
 			builderOptions: {
 				"win": {
-					// "target": ["nsis-web", "nsis"],
 					"target": ["nsis"],
 					"signAndEditExecutable": true,
 				},
@@ -23,7 +22,6 @@ module.exports = {
 					"createDesktopShortcut": true,
 					"runAfterFinish": true,
 				},
-				// publish: ['github'],
 			}
         },
     },
