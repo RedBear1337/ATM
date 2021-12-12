@@ -99,7 +99,6 @@ export default {
           links: [accessData.rate, accessData.abb],
           token: accessData.token
         });
-        electron.ipcRenderer.send('service-events', {action: 'hide-notif', notifData: {type: 'process'}})
 
         // Начало загрузки данных
         if (connectionState) {
